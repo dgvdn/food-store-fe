@@ -3,33 +3,74 @@ import ProductCard from '../../components/ProductCard';
 import Categories from '../../components/Categories';
 
 const Products = () => {
-    const [products, setProducts] = useState([]); // Initializes the products state as an empty array
+    const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(true); // Added isLoading to the state
+    const [selectedCategory, setSelectedCategory] = useState("Tất cả sản phẩm");
 
     useEffect(() => {
-        // Simulating a fetch call using the provided JSON data
         const fetchData = async () => {
-            // Replace 'https://your-api-endpoint.com/products' with your actual API endpoint
-            const response = await fetch('http://localhost:8080/api/v1/product/page?page=0');
-            const data = await response.json();
-            setProducts(data.content); // Assuming 'content' contains your products array
+            try {
+                const response = await fetch('http://localhost:8080/api/v1/product/page?page=0');
+                const data = await response.json();
+                setProducts(data.content); // Assuming 'content' contains your products array
+            } catch (error) {
+                console.error('Error fetching products:', error);
+            } finally {
+                setIsLoading(false);
+            }
         };
 
         fetchData();
-    }, []); // The empty array as the second argument ensures this effect only runs once on mount
+    }, []);
+
+    const onSort = (sortedProducts) => {
+        setFilteredProducts(sortedProducts); // Or update the state however you see fit
+    };
+    
+
+    const onFilter = (categoryName, categoryUrl) => {
+        setSelectedCategory(categoryName); // Update the category name
+        setIsLoading(true);
+        fetch(categoryUrl)
+            .then((response) => response.json())
+            .then((data) => {
+                if (Array.isArray(data)) {
+                    setFilteredProducts(data); // Set filtered products
+                } else {
+                    // Handle case where data is not as expected
+                    console.error('Data received is not an array:', data);
+                }
+            })
+            .catch((error) => {
+                console.error(`Error fetching products for category ${categoryName}:`, error);
+            })
+            .finally(() => {
+                setIsLoading(false);
+            });
+    };
+
+    const onSearch = (searchedProducts) => {
+        setFilteredProducts(searchedProducts);
+    };
 
     return (
         <div className="flex">
-            <Categories /> {/* Sidebar for categories */}
+            <Categories onFilter={onFilter} onSort={onSort} onSearch={onSearch}/>
             <div className="flex-grow">
-                <h2 className="text-center text-3xl mt-12">Products</h2>
-                {
-                    products.length > 0 ? 
-                    <ProductCard products={products} /> // Pass the fetched products to the ProductCard component
-                    : <p>Loading...</p> // Display a loading state while fetching data
-                }
+                <h2 className="text-center text-3xl mt-12">
+                    {selectedCategory} {/* Use the selectedCategoryName state here */}
+                </h2>
+                {isLoading ? (
+                    <p>Loading...</p>
+                ) : filteredProducts.length > 0 ? (
+                    <ProductCard products={filteredProducts} />
+                ) : (
+                    <ProductCard products={products} />
+                )}
             </div>
         </div>
     );
-}
+};
 
 export default Products;

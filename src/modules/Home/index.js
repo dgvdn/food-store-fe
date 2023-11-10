@@ -21,17 +21,6 @@ const Home = () => {
   return (
     <>
       <Hero />
-      <Categories />
-      <h2 className="text-center text-3xl mt-12">Products</h2>
-      <div className="flex flex-wrap justify-center">
-       {
-        products.length > 0 ? 
-        <Products products={products} />
-        : <p>Loading...</p>
-       }
-      </div>
-      <Products />
-      <StatCard />
       <HomeCard />
     </>
   )
