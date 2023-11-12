@@ -5,6 +5,7 @@ const Product = () => {
   const { id } = useParams();
   const navigate = useNavigate()
   const [product, setProduct] = useState({})
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false)
   console.log(id, 'id', product)
 
   useEffect(() => {
@@ -16,28 +17,59 @@ const Product = () => {
   }, []);
 
   const handleCart = (product, redirect) => {
-    console.log(product)
+    console.log(product);
     const cart = JSON.parse(localStorage.getItem('cart')) || [];
-    const isProductExist = cart.find(item => item.id === product.id)
-    if (isProductExist) {
-      const updatedCart = cart.map(item => {
-        if (item.id === product.id) {
-          return {
-            ...item,
-            quantity: item.quantity + 1
-          }
+
+    // Update the quantity locally
+    const updatedCart = cart.cartItems.map(item => {
+      if (item.id === product.id) {
+        return {
+          ...item,
+          quantity: item.quantity + 1,
+        };
+      }
+      return item;
+    });
+
+    // If the product is not in the cart, add it with a default quantity of 1
+    if (!cart.cartItems.find(item => item.id === product.id)) {
+      updatedCart.push({ ...product, quantity: 1 });
+    }
+
+    // Update local storage with the modified cart
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+
+    // Make a request to the server to update the cart
+    const accessToken = localStorage.getItem('accessToken');
+    const apiUrl = `http://localhost:8080/api/v1/cart/add?productId=${product.id}&quantity=1`;
+
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      // You can include a request body if needed
+      // body: JSON.stringify({ /* your request body */ }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to add item to cart');
         }
-        return item
+
+        navigate('/cart');
+
       })
-      localStorage.setItem('cart', JSON.stringify(updatedCart))
-    } else {
-      localStorage.setItem('cart', JSON.stringify([...cart, { ...product, quantity: 1 }]))
-    }
-    alert('Product added to cart')
-    if (redirect) {
-      navigate('/cart')
-    }
-  }
+      .catch(error => {
+        console.error('Error adding item to cart: ', error);
+        setShowSuccessMessage(false)
+      });
+    setShowSuccessMessage(true)
+    setTimeout(() => {
+      setShowSuccessMessage(false)
+    }, 2000)
+  };
+
 
   if (!product) {
     return <div>Loading...</div>;
@@ -135,10 +167,15 @@ const Product = () => {
                 </svg>
               </button>
             </div>
+            {showSuccessMessage && (
+              <div className="absolute top-0 right-0 p-4 bg-green-500 text-white mt-16">
+                Product added to cart successfully!
+              </div>
+            )}
           </div>
         </div>
       </div>
-    </section>
+    </section >
   )
 }
 
