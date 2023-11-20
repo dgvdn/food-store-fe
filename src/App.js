@@ -10,6 +10,8 @@ import CategoryProducts from './modules/CategoryProducts';
 import Cart from './modules/Cart';
 import Login from './modules/Login';
 import Register from './modules/Register';
+import Checkout from './modules/Checkout';
+
 
 function App() {
   return (
@@ -21,6 +23,7 @@ function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/categories/:name" element={<CategoryProducts />} />
         <Route path='cart' element={<Cart />} />
+        <Route path='/checkout' element={<Checkout />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path='*' element={<h1>Page Not Found</h1>} />

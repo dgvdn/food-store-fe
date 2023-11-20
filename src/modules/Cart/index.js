@@ -7,6 +7,7 @@ const Cart = () => {
   const [carts, setCarts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [cartUpdated, setCartUpdated] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCartData = async () => {
@@ -30,6 +31,7 @@ const Cart = () => {
       }
       catch (error) {
         console.error('Failed to fetch cart data', error);
+        setLoading(false);
       }
     };
 
@@ -87,7 +89,6 @@ const Cart = () => {
       );
     } catch (error) {
       console.error('Failed to update quantity on the server', error);
-      // Handle the error, possibly by rolling back the local state
     }
   };
   const updateCartItemInLocalStorage = (itemId, updatedQuantity) => {
@@ -243,7 +244,8 @@ const Cart = () => {
               <span>Total cost</span>
               <span>{formatPriceVND(total + 25000)}</span>
             </div>
-            <button className="bg-indigo-500 font-semibold hover:bg-indigo-600 py-3 text-sm text-white uppercase w-full">Checkout</button>
+            <button className="bg-indigo-500 font-semibold hover:bg-indigo-600 py-3 text-sm text-white uppercase w-full"
+            onClick={() => navigate('/checkout')}>Checkout</button>
           </div>
         </div>
 
