@@ -1,9 +1,11 @@
 import { loadStripe } from '@stripe/stripe-js';
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 
 const Checkout = () => {
     const [carts, setCarts] = React.useState([])
     const [paymentMethod, setPaymentMethod] = React.useState('COD')
+    const navigate = useNavigate();
     const [formData, setFormData] = React.useState({
         name: '',
         address: '',
@@ -62,14 +64,18 @@ const Checkout = () => {
 
             // Handle success (e.g., display a success message, reset the form, etc.)
             console.log('Order placed successfully!');
+            navigate('/success');
         } catch (error) {
             // Handle errors (e.g., display an error message)
             console.error('Error placing the order:', error.message);
         }
     };
 
-    const handleCheckout = async () => {
+    const handleCheckout = async (event) => {
+        event.preventDefault(); // Prevent the default form submission behavior
+
         const accessToken = localStorage.getItem('accessToken');
+
         try {
             const response = await fetch('http://localhost:8080/api/v1/checkout/create-checkout-session', {
                 method: 'POST',
@@ -77,17 +83,26 @@ const Checkout = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${accessToken}`,
                 },
-                body: JSON.stringify(carts),
             });
-            if (response.status === 303) {
-                const url = response.headers.get('Location');
-                window.location.href = url;
-            }
-        }
-        catch (error) {
-            console.log(error)
+            const sessionUrl = await response.text();
+            window.location.href = sessionUrl;
+        } catch (error) {
+            console.log(error);
         }
     }
+
+    const handlePayment = async (event) => {
+        event.preventDefault(); // Prevent the default form submission behavior
+        localStorage.setItem('formData', JSON.stringify(formData))
+        if (paymentMethod === 'CreditCard') {
+            await handleCheckout(event);
+            localStorage.setItem('paymentMethod', 'CreditCard')
+        } else if (paymentMethod === 'COD') {
+            await handleFormSubmit(event);
+            localStorage.setItem('paymentMethod', 'COD')
+        }
+    };
+
     return (
         <div>
             <div className="grid sm:px-10 lg:grid-cols-2 lg:px-20 xl:px-32">
@@ -114,7 +129,7 @@ const Checkout = () => {
                     </div>
                 </div>
                 <div className="mt-10 bg-gray-50 px-4 pt-8 lg:mt-0">
-                    <form onSubmit={handleCheckout}>
+                    <form onSubmit={handlePayment}>
                         <p className="text-xl font-medium">Payment Details</p>
                         <p className="text-gray-400">Complete your order by providing your detail informations.</p>
                         <div className="">

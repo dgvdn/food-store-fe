@@ -11,6 +11,8 @@ import Cart from './modules/Cart';
 import Login from './modules/Login';
 import Register from './modules/Register';
 import Checkout from './modules/Checkout';
+import SuccessPage from './modules/Success';
+import CancelPage from './modules/CancelPage';
 
 
 function App() {
@@ -27,6 +29,8 @@ function App() {
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
         <Route path='*' element={<h1>Page Not Found</h1>} />
+        <Route path='/success' element={<SuccessPage />} />
+        <Route path='/cancel' element={<CancelPage />} />
       </Routes>
       <Footer />
     </div>
