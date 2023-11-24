@@ -13,6 +13,8 @@ import Register from './modules/Register';
 import Checkout from './modules/Checkout';
 import SuccessPage from './modules/Success';
 import CancelPage from './modules/CancelPage';
+import OrderHistory from './modules/OrderHistory';
+import OrderDetail from './modules/OrderDetail';
 
 
 function App() {
@@ -31,6 +33,8 @@ function App() {
         <Route path='*' element={<h1>Page Not Found</h1>} />
         <Route path='/success' element={<SuccessPage />} />
         <Route path='/cancel' element={<CancelPage />} />
+        <Route path='orders' element={<OrderHistory />} />
+        <Route path="/order/:id" element={<OrderDetail/>} />
       </Routes>
       <Footer />
     </div>
